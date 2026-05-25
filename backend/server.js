@@ -17,7 +17,7 @@ const pool = new Pool({
 async function initDB() {
     try{
         await pool.query(`
-            CREATE TABLE ID IF NOT EXISTS produtos(
+            CREATE TABLE IF NOT EXISTS produtos(
                 id SERIAL PRIMARY KEY,
                 nome VARCHAR(255) NOT NULL,
                 quantidade INTEGER NOT NULL,
@@ -33,7 +33,7 @@ async function initDB() {
 initDB(); //chama a função para ela rodar e funcionar quando rodar o servidor local
 
 app.get("/", (req, res) => {
-    res.setEncoding(`
+    res.send(`
        <h2> API de Controle de Estoque </h2>
        <p>API funcionando corretamente!</p>
        <a href="/api/produtos">Ver Produtos</a> 
@@ -73,11 +73,11 @@ app.put(`${BASE_URL}/:id`, async(req, res) => {
         const { nome, quantidade, preco } = req.body;
 
         const result = await pool.query(
-            "UPDATE produtos SET nome=$1, quantidade=$2, WHERE id=$4 RETURNING *" //faz com que nomefique na posição q do array, etc
+            "UPDATE produtos SET nome=$1, quantidade=$2, preco=$3 WHERE id=$4 RETURNING *", //faz com que nomefique na posição q do array, etc
             [nome, quantidade, preco, id]
         );
         
-        res.json(results)
+        res.json(result.rows[0]);
     }catch(errr){
         res.status(500).json({
             error: "Erro ao atualizar o produto"
